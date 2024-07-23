@@ -1,9 +1,11 @@
 # Project Name
-Main description of project
+Solutions for the dataset used in the Kaggle Competition: Binary Classification of Insurance Cross Selling
 
-# Main content
-## Subsection
-Content
+Competition URL: https://www.kaggle.com/competitions/playground-series-s4e7/data
+
+# Content
+## Results
+- Softmax - 
 
 # Roadmap
 - [ ] Checklist item
