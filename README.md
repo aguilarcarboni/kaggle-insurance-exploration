@@ -5,7 +5,7 @@ Competition URL: https://www.kaggle.com/competitions/playground-series-s4e7/data
 
 # Content
 ## Results
-- Softmax - 
+- Softmax - 67.5
 
 # Roadmap
 - [ ] Checklist item

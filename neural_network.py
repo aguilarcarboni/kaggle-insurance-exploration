@@ -43,20 +43,24 @@ num_layers = 2
 num_nodes_per_layer = num_nodes/num_layers
 num_outputs = 1
 
-batch_size = int(num_samples / 100)
-# 1. div 10
+batch_size = int(num_samples / 10)
+# 1. /10
+# 2. /100
+
 n_batches = math.ceil(num_samples / batch_size)
 
-learning_rate = 5e-3
+learning_rate = 1e-3
 # 1. 1e-3
+# 2. 5-e3
+
 # Linear Regression
 # Works best for predicting a category from others
 activation = 'sigmoid'
 loss = 'binary_crossentropy'
 metrics = ['AUC']
 
-n_epochs = 500
-eval_step = 5
+n_epochs = 1
+eval_step = 1
 
 # Create and train model
 # Create a neural network model
@@ -120,6 +124,17 @@ cost_train, auc_train = model.evaluate(train_data, train_labels, batch_size=None
 
 print("Final Test AUC:          {:.4f}".format(auc_test))
 print("Final Training Cost:     {:.4f}".format(cost_train))
+
+
+#
+predictions = []
+prediction = model.predict(test_data)
+for index, data in enumerate(test_data.index):
+        predictions.append([data, prediction[index][0]])
+
+df = pd.DataFrame(predictions, columns=["Id", "Response"])
+print(df)
+df.to_csv("data/predictions.csv", index=False)
 
 # Compute the best test result from the history
 epoch_hist = [i for i in range(0, n_epochs, eval_step)]
