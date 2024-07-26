@@ -35,6 +35,8 @@ print('Training Soft Max Regression model on dataset.')
 
 # Create and fit model on data
 model = linear_model.LogisticRegression(solver='sag', tol=1e-2, max_iter = 50) 
+
+#
 model.fit(train_data, train_labels)
 
 print('Predicting...')

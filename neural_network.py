@@ -24,7 +24,7 @@ train_data, test_data, train_labels, test_labels = sklearn.model_selection.train
         random_state=2024
 )
 
-# Standadrize scale for all columns
+# Standardize scale
 for col in train_data.columns:
     mean = train_data[col].mean()
     stddev = train_data[col].std()
@@ -37,56 +37,44 @@ for col in train_data.columns:
 num_inputs = train_data.shape[1]
 num_samples = train_data.shape[0]
 
-# Training constants
+# Model constants
 num_nodes = 76
 num_layers = 2
 num_nodes_per_layer = num_nodes/num_layers
 num_outputs = 1
 
-batch_size = int(num_samples / 10)
-# 1. /10
-# 2. /100
-
-n_batches = math.ceil(num_samples / batch_size)
-
-learning_rate = 1e-3
-# 1. 1e-3
-# 2. 5-e3
-
-# Linear Regression
-# Works best for predicting a category from others
+# Binary categorization problem
 activation = 'sigmoid'
 loss = 'binary_crossentropy'
 metrics = ['AUC']
 
+# Modifiable parameters
 n_epochs = 1
 eval_step = 1
+learning_rate = 1e-3
+dropout_rate = 0.001
+batch_size = int(num_samples / 10)
+n_batches = math.ceil(num_samples / batch_size)
 
-# Create and train model
-# Create a neural network model
+# Create model
 model = tf.keras.models.Sequential()
-
-# Add an Input layer
 model.add(tf.keras.layers.Input(shape=(num_inputs,)))
 
-# Hidden layer 1:
-#   Inputs: num_inputs - columns
-#   Outputs: num_nodes - arbitrary
-#   Activation: ELU
-for layer in range(num_layers):
+# Hidden layers
+for n in range(num_layers):
         model.add(tf.keras.layers.Dense(
-                        int(num_nodes_per_layer),
+                        num_nodes,
                         activation='elu',
-                        kernel_initializer='he_normal', 
-                        bias_initializer='zeros'
+                        kernel_initializer='he_normal', bias_initializer='zeros'
                 )
         )
+    
+        #model.add(tf.keras.layers.Dropout(dropout_rate))
 
 # Output layer:
 #   Inputs: num_nodes
 #   Outputs: num_outputs
 #   Activation: none/linear
-
 model.add(tf.keras.layers.Dense(
                 num_outputs,
                 activation=activation,
@@ -119,22 +107,11 @@ history = model.fit(
 elapsed_time = time.time() - start_time
 print("Execution time: {:.1f}".format(elapsed_time))
 
+# Evaluate the model
 cost_test, auc_test = model.evaluate(test_data, test_labels, batch_size=None, verbose=0)
 cost_train, auc_train = model.evaluate(train_data, train_labels, batch_size=None, verbose=0)
-
 print("Final Test AUC:          {:.4f}".format(auc_test))
 print("Final Training Cost:     {:.4f}".format(cost_train))
-
-
-#
-predictions = []
-prediction = model.predict(test_data)
-for index, data in enumerate(test_data.index):
-        predictions.append([data, prediction[index][0]])
-
-df = pd.DataFrame(predictions, columns=["Id", "Response"])
-print(df)
-df.to_csv("data/predictions.csv", index=False)
 
 # Compute the best test result from the history
 epoch_hist = [i for i in range(0, n_epochs, eval_step)]
@@ -142,6 +119,29 @@ test_auc_hist = history.history['val_AUC']
 test_best_val = max(test_auc_hist)
 test_best_idx = test_auc_hist.index(test_best_val)
 print("Best Test AUC:           {:.4f} at epoch: {}".format(test_best_val, epoch_hist[test_best_idx]))
+
+# Read test data
+submission_data = pd.read_csv('data/test.csv', header=0)
+submission_data = pd.get_dummies(submission_data, prefix_sep="_", drop_first=True, dtype=int)
+
+# Standadrize scale for all columns
+for col in submission_data.columns:
+    mean = submission_data[col].mean()
+    stddev = submission_data[col].std()
+    submission_data[col] = submission_data[col] - mean
+    submission_data[col] = submission_data[col]/stddev
+
+# Predict data
+prediction = model.predict(submission_data)
+
+# Parse response into submission template
+submission_df = pd.DataFrame(prediction, columns=["Response"])
+submission_df['id'] = submission_data.index
+submission_df = submission_df[1:]
+print(submission_df)
+
+# Save as a csv
+submission_df.to_csv("data/submission.csv", index=False)
 
 # Plot the history of the loss
 plt.plot(history.history['loss'])

@@ -34,7 +34,7 @@ for col in train_data.columns:
 print('Training Random Forest Regression model on dataset.')
 
 # Create and fit model
-model = ensemble.RandomForestClassifier(n_estimators = 100, min_samples_leaf = 1e-4) 
+model = ensemble.RandomForestClassifier(n_estimators = 1, min_samples_leaf = 1e-4) 
 model.fit(train_data, train_labels)
 
 print('Predicting...')
