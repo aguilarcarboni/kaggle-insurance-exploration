@@ -49,7 +49,7 @@ loss = 'binary_crossentropy'
 metrics = ['AUC']
 
 # Modifiable parameters
-n_epochs = 1
+n_epochs = 100
 eval_step = 1
 learning_rate = 1e-3
 dropout_rate = 0.001
@@ -121,8 +121,8 @@ test_best_idx = test_auc_hist.index(test_best_val)
 print("Best Test AUC:           {:.4f} at epoch: {}".format(test_best_val, epoch_hist[test_best_idx]))
 
 # Read test data
-submission_data = pd.read_csv('data/test.csv', header=0)
-submission_data = pd.get_dummies(submission_data, prefix_sep="_", drop_first=True, dtype=int)
+df_data = pd.read_csv('data/test.csv')
+submission_data = pd.get_dummies(df_data, prefix_sep="_", drop_first=True, dtype=int)
 
 # Standadrize scale for all columns
 for col in submission_data.columns:
@@ -136,8 +136,7 @@ prediction = model.predict(submission_data)
 
 # Parse response into submission template
 submission_df = pd.DataFrame(prediction, columns=["Response"])
-submission_df['id'] = submission_data.index
-submission_df = submission_df[1:]
+submission_df['id'] = df_data['id']
 print(submission_df)
 
 # Save as a csv
