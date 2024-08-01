@@ -1,3 +1,7 @@
+# Regularized and Unregularized Neural Network
+# Jose Miguel Loguirato, Andres Aguilar, Maria Elena Leizaola
+# CS 3368
+
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -43,18 +47,18 @@ num_layers = 2
 num_nodes_per_layer = num_nodes/num_layers
 num_outputs = 1
 
+# Modifiable parameters
+n_epochs = 100
+eval_step = 1
+learning_rate = 5e-4
+dropout_rate = 0.0075
+batch_size = int(num_samples / 1500)
+n_batches = math.ceil(num_samples / batch_size)
+
 # Binary categorization problem
 activation = 'sigmoid'
 loss = 'binary_crossentropy'
 metrics = ['AUC']
-
-# Modifiable parameters
-n_epochs = 100
-eval_step = 1
-learning_rate = 1e-3
-dropout_rate = 0.001
-batch_size = int(num_samples / 10)
-n_batches = math.ceil(num_samples / batch_size)
 
 # Create model
 model = tf.keras.models.Sequential()
@@ -68,13 +72,11 @@ for n in range(num_layers):
                         kernel_initializer='he_normal', bias_initializer='zeros'
                 )
         )
-    
+        
+        # This line adds regularization
         #model.add(tf.keras.layers.Dropout(dropout_rate))
 
 # Output layer:
-#   Inputs: num_nodes
-#   Outputs: num_outputs
-#   Activation: none/linear
 model.add(tf.keras.layers.Dense(
                 num_outputs,
                 activation=activation,
@@ -86,7 +88,7 @@ model.add(tf.keras.layers.Dense(
 # Define the optimizer
 optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
-# Define loss function for expected result
+# Compile the model
 model.compile(
         optimizer=optimizer,
         loss=loss,
@@ -107,7 +109,7 @@ history = model.fit(
 elapsed_time = time.time() - start_time
 print("Execution time: {:.1f}".format(elapsed_time))
 
-# Evaluate the model
+# Generate ROCAUC score
 cost_test, auc_test = model.evaluate(test_data, test_labels, batch_size=None, verbose=0)
 cost_train, auc_train = model.evaluate(train_data, train_labels, batch_size=None, verbose=0)
 print("Final Test AUC:          {:.4f}".format(auc_test))
@@ -119,28 +121,6 @@ test_auc_hist = history.history['val_AUC']
 test_best_val = max(test_auc_hist)
 test_best_idx = test_auc_hist.index(test_best_val)
 print("Best Test AUC:           {:.4f} at epoch: {}".format(test_best_val, epoch_hist[test_best_idx]))
-
-# Read test data
-df_data = pd.read_csv('data/test.csv')
-submission_data = pd.get_dummies(df_data, prefix_sep="_", drop_first=True, dtype=int)
-
-# Standadrize scale for all columns
-for col in submission_data.columns:
-    mean = submission_data[col].mean()
-    stddev = submission_data[col].std()
-    submission_data[col] = submission_data[col] - mean
-    submission_data[col] = submission_data[col]/stddev
-
-# Predict data
-prediction = model.predict(submission_data)
-
-# Parse response into submission template
-submission_df = pd.DataFrame(prediction, columns=["Response"])
-submission_df['id'] = df_data['id']
-print(submission_df)
-
-# Save as a csv
-submission_df.to_csv("data/submission.csv", index=False)
 
 # Plot the history of the loss
 plt.plot(history.history['loss'])
@@ -155,3 +135,27 @@ plt.title('Test AUC')
 plt.ylabel('AUC')
 plt.xlabel('Epoch')
 plt.show()
+
+# Read submission data
+df_data = pd.read_csv('data/test.csv')
+submission_data = pd.get_dummies(df_data, prefix_sep="_", drop_first=True, dtype=int)
+
+# Standadrize scale for all columns
+for col in submission_data.columns:
+    mean = submission_data[col].mean()
+    stddev = submission_data[col].std()
+    submission_data[col] = submission_data[col] - mean
+    submission_data[col] = submission_data[col]/stddev
+
+# Predict data
+print('Creating submission data...')
+prediction = model.predict(submission_data)
+print('Done!')
+
+# Parse response into submission template
+submission_df = pd.DataFrame(prediction, columns=["Response"])
+submission_df['id'] = df_data['id']
+print(submission_df)
+
+# Save as a csv
+submission_df.to_csv("data/submission.csv", index=False)

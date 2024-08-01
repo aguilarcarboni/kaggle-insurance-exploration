@@ -5,9 +5,8 @@
 import pandas as pd
 from sklearn import metrics, linear_model, model_selection
 
-df = pd.read_csv("data/train.csv", header=0)
-
 # Preprocess data
+df = pd.read_csv("data/train.csv", header=0)
 df = pd.get_dummies(df, prefix_sep="_", drop_first=True, dtype=int)
 
 labels = df["Response"]
@@ -31,15 +30,32 @@ for col in train_data.columns:
     test_data[col] = test_data[col] - mean
     test_data[col] = test_data[col]/stddev
 
-print('Training Soft Max Regression model on dataset.')
+# Modifiable parameters
+tolerance = 1e-3
+max_iter = 100
 
 # Create and fit model on data
-model = linear_model.LogisticRegression(solver='sag', tol=1e-2, max_iter = 50) 
-
-#
+print('Training Logistic Regression model on dataset.')
+model = linear_model.LogisticRegression(solver='sag', tol=tolerance, max_iter = max_iter) 
 model.fit(train_data, train_labels)
 
+# Generate ROCAUC score
 print('Predicting...')
 pred = model.predict(test_data)
-
 print("ROC:   {:.3f}".format(metrics.roc_auc_score(test_labels, pred)))
+
+# Read submission data
+df_data = pd.read_csv('data/test.csv')
+submission_data = pd.get_dummies(df_data, prefix_sep="_", drop_first=True, dtype=int)
+
+# Standadrize scale for all columns
+for col in submission_data.columns:
+    mean = submission_data[col].mean()
+    stddev = submission_data[col].std()
+    submission_data[col] = submission_data[col] - mean
+    submission_data[col] = submission_data[col]/stddev
+
+# Predict data
+print('Creating submission data...')
+prediction = model.predict(submission_data)
+print('Done!')

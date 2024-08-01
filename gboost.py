@@ -1,11 +1,10 @@
-# Random Forest Classifier
+# Gradient Boosted Trees Classifier
 # Jose Miguel Loguirato, Andres Aguilar, Maria Elena Leizaola
 # CS 3368
 
 import pandas as pd
-from sklearn import metrics, ensemble, model_selection
 import matplotlib.pyplot as plt
-import sklearn
+from sklearn import model_selection, ensemble, metrics
 
 # Load and prepare the data
 df = pd.read_csv("data/train.csv", header=0)
@@ -34,21 +33,27 @@ for col in train_data.columns:
     test_data[col] = test_data[col]/stddev
 
 # Modifiable parameters
-num_estimators = 25
-msl = 5e-5
+num_estimators = 10
+msl = 0.001
+subsampling=0.2
 
 # Create and fit model
-print('Training Random Forest Regression model on dataset.')
-model = ensemble.RandomForestClassifier(n_estimators = num_estimators, min_samples_leaf = msl) 
+print('Training Gradient Boosted Trees model on dataset.')
+model = ensemble.GradientBoostingClassifier(
+    loss='log_loss', 
+    subsample=subsampling,
+    n_estimators=num_estimators,
+    min_samples_leaf=msl
+)
 model.fit(train_data, train_labels)
 
 # Generate ROCAUC score
 pred_proba = model.predict_proba(test_data)[:,1]
-auc_score = sklearn.metrics.roc_auc_score(test_labels, pred_proba)
+auc_score = metrics.roc_auc_score(test_labels, pred_proba)
 print("Test AUC score: {:.4f}".format(auc_score))
 
 # Compute a precision & recall graph
-precisions, recalls, thresholds = sklearn.metrics.precision_recall_curve(test_labels, pred_proba)
+precisions, recalls, thresholds = metrics.precision_recall_curve(test_labels, pred_proba)
 plt.plot(thresholds, precisions[:-1], "b--", label="Precision")
 plt.plot(thresholds, recalls[:-1], "g-", label="Recall")
 plt.legend(loc="center left")
@@ -57,7 +62,7 @@ plt.axis([0.0, 1.0, 0.0, 1.0])
 plt.show()
 
 # Plot a ROC curve
-fpr, tpr, _ = sklearn.metrics.roc_curve(test_labels, pred_proba)
+fpr, tpr, _ = metrics.roc_curve(test_labels, pred_proba)
 plt.plot(fpr,tpr)
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
