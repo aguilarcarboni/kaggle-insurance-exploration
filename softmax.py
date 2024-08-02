@@ -30,18 +30,12 @@ for col in train_data.columns:
     test_data[col] = test_data[col] - mean
     test_data[col] = test_data[col]/stddev
 
-# Modifiable parameters
-tolerance = 1e-3
-max_iter = 100
-
 # Create and fit model on data
-print('Training Logistic Regression model on dataset.')
-model = linear_model.LogisticRegression(solver='sag', tol=tolerance, max_iter = max_iter) 
+model = linear_model.LogisticRegression(tol=5e-3, solver='newton-cg')
 model.fit(train_data, train_labels)
 
 # Generate ROCAUC score
-print('Predicting...')
-pred = model.predict(test_data)
+pred = model.predict_proba(test_data)[:,1]
 print("ROC:   {:.3f}".format(metrics.roc_auc_score(test_labels, pred)))
 
 # Read submission data
@@ -57,5 +51,5 @@ for col in submission_data.columns:
 
 # Predict data
 print('Creating submission data...')
-prediction = model.predict(submission_data)
+prediction = model.predict_proba(submission_data)[:,1]
 print('Done!')
