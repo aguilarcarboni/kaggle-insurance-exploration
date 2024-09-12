@@ -3,5 +3,6 @@ Solutions for the dataset used in the Kaggle Competition: Binary Classification 
 
 Competition URL: https://www.kaggle.com/competitions/playground-series-s4e7/data
 
-Achieved a final result of 86.116% accuracy
-Placed #1262/2236
+**Achieved a final result of 86.116% accuracy**
+
+**Placed #1262/2236**
