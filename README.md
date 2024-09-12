@@ -9,4 +9,4 @@ Tasked in finding the best model for the dataset used in the Kaggle Competition:
 ### Results
  - Achieved a final result of 86.116% accuracy
  - Placed #1262/2236
- - Scored 89% on project presentation
+ - Scored 89% in the project.
