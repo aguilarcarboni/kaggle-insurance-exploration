@@ -10,3 +10,5 @@ Tasked in finding the best model for the dataset used in the Kaggle Competition:
  - Achieved a final result of 86.116% accuracy
  - Placed #1262/2236
  - Scored 89% in the project.
+
+### created by [@aguilarcarboni](https://github.com/aguilarcarboni/), @mariaelenaleizaola and @josemiguelloguirato
