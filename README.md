@@ -1,6 +1,6 @@
 # Kaggle Insurance Exploration
 
-## CS3368: Introduction to Artificial Intelligence - Final Project
+## Introduction to Artificial Intelligence
 
 ### Description
 
